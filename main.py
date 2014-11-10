@@ -8,6 +8,8 @@ import math
 from constantsID3 import *
 import sys
 import copy
+import codecs
+
 
 ''' Define un atributo :
 Nombre: del atributo:
@@ -23,8 +25,8 @@ class Attribute(object):
 		self.list.append(value)
 	def __str__(self):
 		str1 = ""
-		for l in self.list:
-			str1+="Merit:" + str(self.gain) + "[" + str(self.name) +":" + str(l.__str__())+"]\n"
+		for k,l in enumerate(self.list):
+			str1+="k:" + str(k) +"Merit:" + str(self.gain) + "[" + str(self.name) +":" + str(l.__str__())+"]\n"
 		return str1
 	def __repr__(self):
 		return self.__str__()
@@ -53,15 +55,16 @@ class AttributeList(object):
 		#print self.nonCategoricalAttr
 	def remove_element(self,i):
 		for k,v in enumerate(self.categoricalAtrrList):
-			v.list[k]=None
+			v.list[i]=None
 		self.nonCategoricalAttr[0].list[i] = None
 	def clear_none_elements(self):
 		for k,v in enumerate(self.categoricalAtrrList):
-			for k1,v1 in enumerate(v.list):
-				if(v1 is None):
-					v.list.pop(k)
+			for i in range(v.list.count(None)):
+				v.list.remove(None)
+		for i in range(self.nonCategoricalAttr[0].list.count(None)):
+			self.nonCategoricalAttr[0].list.remove(None)
 	def remove_attr(self,i):
-		self.categoricalAtrrList.remove(i)
+		self.categoricalAtrrList.pop(i)
 	''' Calcula el mérito de todos los atributos y los ordena por el menor mérito '''
 	def calculate_gain(self):
 		for k,v in enumerate(self.categoricalAtrrList):
@@ -101,15 +104,10 @@ class AttributeList(object):
 		return self.__str__()
 	def __str__(self):
 		str1 = ""
-		for l in self.list:
+		for l in self.categoricalAtrrList:
 			str1+="[ "+str(l.__str__())+"]"
 		return str1
 
-class Node(object):
-	def __init__(self,value):
-		self.value = value
-	def __str__(self):
-		return self.value
 
 ''' Procesa los valores de los Atributos de Juego del fichero determinado '''
 def process_game_values(attrlist):
@@ -127,67 +125,66 @@ def process_attr_game(attrlist):
 		a = Attribute(x)
 		attrlist.appendAttribute(a)
 	f.close()
-	'''
-function ID3 (R: a set of non-categorical attributes,
-		 C: the categorical attribute,
-		 S: a training set) returns a decision tree;
-   begin
-	If S is empty, return a single node with value Failure;
-	If S consists of records all with the same value for 
-	   the categorical attribute, 
-	   return a single node with that value;
-	If R is empty, then return a single node with as value
-	   the most frequent of the values of the categorical attribute
-	   that are found in records of S; [note that then there
-	   will be errors, that is, records that will be improperly
-	   classified];
-	Let D be the attribute with largest Gain(D,S) 
-	   among attributes in R;
-	Let {dj| j=1,2, .., m} be the values of attribute D;
-	Let {Sj| j=1,2, .., m} be the subsets of S consisting 
-	   respectively of records with value dj for attribute D;
-	Return a tree with root labeled D and arcs labeled 
-	   d1, d2, .., dm going respectively to the trees 
 
-	     ID3(R-{D}, C, S1), ID3(R-{D}, C, S2), .., ID3(R-{D}, C, Sm);
-   end ID3;
-   http://www.cis.temple.edu/~ingargio/cis587/readings/id3-c45.html
-'''
-
-''''function ID3
-		(
-		R: a set of non-categorical attributes,
-		C: the categorical attribute,
-		S: a training set) 
-	returns a decision tree;
-'''
-
+class Node(object):
+	def __init__(self,value,children=[]):
+		self.value= value
+		self.children = children
+	def append_children(self,element=[]):
+		self.children = self.children + element
+		#print self.children
+	def __repr__(self,level=0):
+		ret = "\t"*level+repr(self.value)+"\n"	
+		for child in self.children:
+			ret += child.__repr__(level+1)
+		return ret
 
 def ID3(example_list):
-	
+#1. Si lista-ejemplos está vacía, "regresar"; en caso contrario, seguir.
 	if not example_list:
 		return 
-
 	count = example_list.nonCategoricalAttr[0].list.count(set_true_attr())
 	if(count == 0):
-		return Node("-")
+	# 2. Si todos los ejemplos en lista-ejemplos son +, devolver "+"; de otro modo seguir
+		return Node("negativo")
+		#return Node("-")
+ 	# 3. Si todos los ejemplos en lista-ejemplos son -, devolver "-"; de otro modo seguir 
 	if(count == len(example_list.nonCategoricalAttr)):
-		return Node("+")
+		#return Node("+")
+		return Node("positivo")
+	# 4. Si lista-atributos está vacía, devolver "error"; en caso contrario:
 
+	# (1) llamar mejor al elemento a de lista-atributos que minimice mérito 
 	example_list.calculate_gain()
 	best = example_list.return_best_gain()
 
-	v1 = list(set(best.list))
+	
 
+	v1 = list(set(best.list))
+#   (a) (2) iniciar un árbol cuya raíz sea mejor: para cada valor vi de mejor
+	n = Node(str(best.name))
+	#print n
 	for vi in v1:
+		#print "%s" %  vi
+		n1 = Node(vi)
+		n.append_children([n1])
 		aux_list = copy.deepcopy(example_list)
+		#   * incluir en ejemplos-restantes los elementos de lista-ejemplos que tengan valor vi del atributo mejor. 
 		for i,v in enumerate(best.list):
 			if(v!=vi):
-				print i
+				#print i
 				aux_list.remove_element(i)
 		aux_list.clear_none_elements()		
+		 #  * dejar en atributos-restantes todos los elementos de lista-atributos excepto mejor.
+		aux_list.remove_attr(0)
+		 #  * devolver el valor de: ID3 (ejemplos-restantes, atributos-restantes) (llamada recursiva al algoritmo)
 		p = ID3(aux_list)
-		#print p
+		if (p):
+			n1.append_children([p])
+			#print n1
+
+	return n
+
 
 def main():
 	attrlist = AttributeList()
@@ -195,20 +192,26 @@ def main():
 	process_game_values(attrlist)
 	#attrlist.calculate_all_merit()
 	p = ID3(attrlist)
+
+
 	print p
 
+	'''tree = Node("grandmother", [
+    Node("daughter", [
+        Node("granddaughter"),
+        Node("grandson")]),
+    Node("son", [
+        Node("granddaughter"),
+        Node("grandson")])
+    ]);
+	print tree'''
+	#n1 = Node("juanito")
+	#tree = Node("pepito")
+	#tree.append_children([n1])
+	#print tree
 
-
-'''1. Si lista-ejemplos está vacía, "regresar"; en caso contrario, seguir.
-	 2. Si todos los ejemplos en lista-ejemplos son +, devolver "+"; de otro modo seguir
- 	 3. Si todos los ejemplos en lista-ejemplos son -, devolver "-"; de otro modo seguir 
-	 4. Si lista-atributos está vacía, devolver "error"; en caso contrario:
-	   (1) llamar mejor al elemento a de lista-atributos que minimice mérito 
-	   (a) (2) iniciar un árbol cuya raíz sea mejor: para cada valor vi de mejor
-	   * incluir en ejemplos-restantes los elementos de lista-ejemplos que tengan valor vi del atributo mejor. 
-	   * dejar en atributos-restantes todos los elementos de lista-atributos excepto mejor.
-	   * devolver el valor de: ID3 (ejemplos-restantes, atributos-restantes) (llamada recursiva al algoritmo)
-'''
+	
+	
 
 if __name__ == "__main__":
 	main()
