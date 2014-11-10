@@ -143,17 +143,22 @@ def ID3(example_list):
 #1. Si lista-ejemplos está vacía, "regresar"; en caso contrario, seguir.
 	if not example_list:
 		return 
+
 	count = example_list.nonCategoricalAttr[0].list.count(set_true_attr())
 	if(count == 0):
 	# 2. Si todos los ejemplos en lista-ejemplos son +, devolver "+"; de otro modo seguir
 		return Node("negativo")
 		#return Node("-")
- 	# 3. Si todos los ejemplos en lista-ejemplos son -, devolver "-"; de otro modo seguir 
-	if(count == len(example_list.nonCategoricalAttr)):
+ 	# 3. Si todos los ejemplos en lista-ejemplos son -, devolver "-"; de otro modo seguir
+ 	#print example_list.nonCategoricalAttr[0].list
+ 	#print "Cuenta de 'SI' %d Cuenta de los elementos que hay ... %d" % (count , len(example_list.nonCategoricalAttr))
+
+	if(count == len(example_list.nonCategoricalAttr[0].list)):
 		#return Node("+")
+
 		return Node("positivo")
 	# 4. Si lista-atributos está vacía, devolver "error"; en caso contrario:
-
+	
 	# (1) llamar mejor al elemento a de lista-atributos que minimice mérito 
 	example_list.calculate_gain()
 	best = example_list.return_best_gain()
@@ -192,24 +197,9 @@ def main():
 	process_game_values(attrlist)
 	#attrlist.calculate_all_merit()
 	p = ID3(attrlist)
-
-
 	print p
 
-	'''tree = Node("grandmother", [
-    Node("daughter", [
-        Node("granddaughter"),
-        Node("grandson")]),
-    Node("son", [
-        Node("granddaughter"),
-        Node("grandson")])
-    ]);
-	print tree'''
-	#n1 = Node("juanito")
-	#tree = Node("pepito")
-	#tree.append_children([n1])
-	#print tree
-
+	
 	
 	
 
