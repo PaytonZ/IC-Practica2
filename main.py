@@ -26,7 +26,8 @@ class Attribute(object):
 	def __str__(self):
 		str1 = ""
 		for k,l in enumerate(self.list):
-			str1+="k:" + str(k) +"Merit:" + str(self.gain) + "[" + str(self.name) +":" + str(l.__str__())+"]\n"
+			str1 += str(self.name) +":" + str(l.__str__())+"]\n"
+			#str1+="k:" + str(k) +"Merit:" + str(self.gain) + "[" + str(self.name) +":" + str(l.__str__())+"]\n"
 		return str1
 	def __repr__(self):
 		return self.__str__()
@@ -117,6 +118,13 @@ def process_game_values(attrlist):
 				attrlist.append(i,x.rstrip('\r\n'))
 	attrlist.setNonCategoricalAttr()
 
+def process_game_values_filename(attrlist,filename):
+	with open(filename) as fp:
+		for line in fp:
+			for i,x in enumerate(line.split(",")):
+				attrlist.append(i,x.rstrip('\r\n'))
+	attrlist.setNonCategoricalAttr()
+
 ''' Crea los atributos de Juego del fichero determinado '''
 def process_attr_game(attrlist):
 	f = open(game_attr_filename(), 'r')
@@ -143,28 +151,21 @@ def ID3(example_list):
 #1. Si lista-ejemplos está vacía, "regresar"; en caso contrario, seguir.
 	if not example_list:
 		return 
-
 	count = example_list.nonCategoricalAttr[0].list.count(set_true_attr())
 	if(count == 0):
 	# 2. Si todos los ejemplos en lista-ejemplos son +, devolver "+"; de otro modo seguir
-		return Node("negativo")
+		return Node(get_false_node())
 		#return Node("-")
  	# 3. Si todos los ejemplos en lista-ejemplos son -, devolver "-"; de otro modo seguir
  	#print example_list.nonCategoricalAttr[0].list
  	#print "Cuenta de 'SI' %d Cuenta de los elementos que hay ... %d" % (count , len(example_list.nonCategoricalAttr))
-
 	if(count == len(example_list.nonCategoricalAttr[0].list)):
 		#return Node("+")
-
-		return Node("positivo")
+		return Node(get_true_node())
 	# 4. Si lista-atributos está vacía, devolver "error"; en caso contrario:
-	
 	# (1) llamar mejor al elemento a de lista-atributos que minimice mérito 
 	example_list.calculate_gain()
 	best = example_list.return_best_gain()
-
-	
-
 	v1 = list(set(best.list))
 #   (a) (2) iniciar un árbol cuya raíz sea mejor: para cada valor vi de mejor
 	n = Node(str(best.name))
@@ -186,10 +187,37 @@ def ID3(example_list):
 		p = ID3(aux_list)
 		if (p):
 			n1.append_children([p])
-			#print n1
-
 	return n
 
+class Rule(object):
+	def __init__(self):
+		self.name = ""
+		self.value = ""
+		self.outcome = False
+		self.rule = None
+	def insert_name(self,name):
+		self.name = name
+	def insert_value(self,value):
+		self.value = value
+	def get_outcome(self):
+		if(rule):
+			return self.rule.get_outcome()
+
+
+def generate_rules(attr,node):
+	val = ""
+	val_index = -1
+	for k,v in enumerate(attr.categoricalAtrrList):
+		if(v.name == node.value ):
+			val_index = k
+			val = v
+	if(val_index !=-1):
+		for child in node.children:
+			if(child.value == val.list[0]):
+				#print child.value
+				for child1 in child:
+					if(child1.value == get_true_node() or child1.value == get_false_node()):
+						return child1.value
 
 def main():
 	attrlist = AttributeList()
@@ -198,10 +226,13 @@ def main():
 	#attrlist.calculate_all_merit()
 	p = ID3(attrlist)
 	print p
+'''
+	attrlist = AttributeList()
+	process_attr_game(attrlist)
+	process_game_values_filename(attrlist,"Test1Juego.txt")
 
-	
-	
-	
+	generate_rules(attrlist,p)
+	'''
 
 if __name__ == "__main__":
 	main()

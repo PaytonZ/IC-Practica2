@@ -16,3 +16,7 @@ def set_true_attr():
 	global true_attr
 	true_attr = 'si'
 	return true_attr
+def get_true_node():
+	return "positivo"
+def get_false_node():
+	return "negativo"
