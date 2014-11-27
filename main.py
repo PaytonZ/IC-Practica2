@@ -205,19 +205,22 @@ class Rule(object):
 
 
 def generate_rules(attr,node):
-	val = ""
-	val_index = -1
+	outcome = True
 	for k,v in enumerate(attr.categoricalAtrrList):
+		val = ""
+		val_index = -1
+		#print node.value
 		if(v.name == node.value ):
 			val_index = k
 			val = v
-	if(val_index !=-1):
-		for child in node.children:
-			if(child.value == val.list[0]):
-				#print child.value
-				for child1 in child:
-					if(child1.value == get_true_node() or child1.value == get_false_node()):
-						return child1.value
+		if(val_index !=-1):
+			for child in node.children:
+				if(child.value == val.list[0]):
+					for child1 in child.children:
+						if(child1.value == get_true_node() or child1.value == get_false_node()):
+							outcome = outcome and child1.value
+						node = child1
+	return outcome
 
 def main():
 	attrlist = AttributeList()
@@ -226,13 +229,29 @@ def main():
 	#attrlist.calculate_all_merit()
 	p = ID3(attrlist)
 	print p
-'''
+
 	attrlist = AttributeList()
 	process_attr_game(attrlist)
 	process_game_values_filename(attrlist,"Test1Juego.txt")
+	print generate_rules(attrlist,p)
 
-	generate_rules(attrlist,p)
-	'''
+	attrlist = AttributeList()
+	process_attr_game(attrlist)
+	process_game_values_filename(attrlist,"Test2Juego.txt")
+	print generate_rules(attrlist,p)
+
+	attrlist = AttributeList()
+	process_attr_game(attrlist)
+	process_game_values_filename(attrlist,"Test3Juego.txt")
+	print generate_rules(attrlist,p)
+
+	attrlist = AttributeList()
+	process_attr_game(attrlist)
+	process_game_values_filename(attrlist,"Test4Juego.txt")
+	print generate_rules(attrlist,p)
+	
+	
+	
 
 if __name__ == "__main__":
 	main()
