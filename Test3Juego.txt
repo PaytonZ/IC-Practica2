@@ -1,2 +1,1 @@
 nublado,caluroso,alta,falso,??
-

@@ -26,7 +26,7 @@ class Attribute(object):
 	def __str__(self):
 		str1 = ""
 		for k,l in enumerate(self.list):
-			str1 += str(self.name) +":" + str(l.__str__())+"]\n"
+			str1 += str(self.name) +":" + str(l.__str__())
 			#str1+="k:" + str(k) +"Merit:" + str(self.gain) + "[" + str(self.name) +":" + str(l.__str__())+"]\n"
 		return str1
 	def __repr__(self):
@@ -189,20 +189,6 @@ def ID3(example_list):
 			n1.append_children([p])
 	return n
 
-class Rule(object):
-	def __init__(self):
-		self.name = ""
-		self.value = ""
-		self.outcome = False
-		self.rule = None
-	def insert_name(self,name):
-		self.name = name
-	def insert_value(self,value):
-		self.value = value
-	def get_outcome(self):
-		if(rule):
-			return self.rule.get_outcome()
-
 
 def generate_rules(attr,node):
 	outcome = True
@@ -222,36 +208,51 @@ def generate_rules(attr,node):
 						node = child1
 	return outcome
 
+def wait():
+	import msvcrt as m
+    	m.getch()
+
 def main():
+
+	print "Iniciando Algoritmo ID3..."
 	attrlist = AttributeList()
 	process_attr_game(attrlist)
 	process_game_values(attrlist)
 	#attrlist.calculate_all_merit()
+	print "Arbol generado:"
 	p = ID3(attrlist)
 	print p
 
 	attrlist = AttributeList()
 	process_attr_game(attrlist)
 	process_game_values_filename(attrlist,"Test1Juego.txt")
-	print generate_rules(attrlist,p)
+	print "Ejecutando Test1Juego"
+	print attrlist
+	print "Se puede jugar ? " + str(generate_rules(attrlist,p))
 
 	attrlist = AttributeList()
 	process_attr_game(attrlist)
 	process_game_values_filename(attrlist,"Test2Juego.txt")
-	print generate_rules(attrlist,p)
+	print "Ejecutando Test2Juego"
+	print attrlist
+	print "Se puede jugar ? " + str(generate_rules(attrlist,p))
 
 	attrlist = AttributeList()
 	process_attr_game(attrlist)
 	process_game_values_filename(attrlist,"Test3Juego.txt")
-	print generate_rules(attrlist,p)
+	print "Ejecutando Test3Juego"
+	print attrlist
+	print "Se puede jugar ? " + str(generate_rules(attrlist,p))
 
 	attrlist = AttributeList()
 	process_attr_game(attrlist)
 	process_game_values_filename(attrlist,"Test4Juego.txt")
-	print generate_rules(attrlist,p)
+	print "Ejecutando Test4Juego"
+	print attrlist
+	print "Se puede jugar ? " + str(generate_rules(attrlist,p))
 	
-	
-	
+	print "Pulse cualquier tecla para salir"
+	wait()
 
 if __name__ == "__main__":
 	main()
